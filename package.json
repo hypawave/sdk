@@ -54,7 +54,7 @@
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/hypawave/sdk"
+    "url": "git+https://github.com/hypawave/sdk.git"
   },
   "homepage": "https://hypawave.com/docs",
   "devDependencies": {
