@@ -8,6 +8,8 @@
 
 *Status: Alpha. API is usable; breaking changes possible before 1.0.*
 
+> ⚠️ **Hypawave has no token and will never issue one.** Any "HYPA," "WAVE," airdrop, or token offer claiming to be from Hypawave is a scam. Hypawave is non-custodial Bitcoin Lightning settlement — buyers pay creators directly in sats. The protocol fee is the only economic primitive.
+
 TypeScript SDK for settlement-triggered Lightning execution. Fetch creator-direct Lightning invoices, confirm preimage proof, and trigger deterministic unlocks.
 
 **Payment is the authorization — confirmed settlement unconditionally unlocks access.**
@@ -421,6 +423,17 @@ Hypawave is the execution layer: the same preimage that proves payment atomicall
 - **Issues / bug reports**: [github.com/hypawave/sdk/issues](https://github.com/hypawave/sdk/issues)
 - **Security**: report privately to support@hypawave.com (please do not file public issues for vulnerabilities)
 - **General inquiries**: support@hypawave.com
+
+### Official Channels Only
+
+Hypawave only operates via these official channels. Anything else is impersonation:
+
+- **Website**: [hypawave.com](https://hypawave.com)
+- **GitHub**: [github.com/hypawave/sdk](https://github.com/hypawave/sdk)
+- **npm**: [npmjs.com/package/@hypawave/sdk](https://www.npmjs.com/package/@hypawave/sdk)
+- **Email**: support@hypawave.com
+
+There is no Hypawave token, airdrop, ICO, or sale. Hypawave does not request wallet connections outside its documented payment flow. Verify any link claiming to be Hypawave against this list before connecting a wallet or signing transactions.
 
 ## License
 
