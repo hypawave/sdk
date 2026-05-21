@@ -1,0 +1,67 @@
+{
+  "name": "@hypawave/sdk",
+  "version": "0.1.0",
+  "description": "TypeScript SDK for Lightning settlement, preimage proof, and execution unlocks for AI agents.",
+  "main": "dist/index.js",
+  "module": "dist/index.mjs",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs,esm --dts --clean",
+    "prepublishOnly": "npm run build"
+  },
+  "keywords": [
+    "hypawave",
+    "lightning",
+    "lightning-sdk",
+    "lightning-api",
+    "lightning-network",
+    "bitcoin",
+    "bitcoin-payments",
+    "settlement",
+    "payments",
+    "paywall",
+    "non-custodial",
+    "agent",
+    "agent-payments",
+    "ai-agents",
+    "ai",
+    "llm",
+    "api",
+    "sdk",
+    "preimage",
+    "preimage-proof",
+    "wallet",
+    "nwc",
+    "bolt11",
+    "lnurl",
+    "x402",
+    "l402",
+    "micropayments"
+  ],
+  "author": "hypawave",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/hypawave/sdk"
+  },
+  "homepage": "https://hypawave.com/docs",
+  "devDependencies": {
+    "tsup": "^8.0.0",
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
