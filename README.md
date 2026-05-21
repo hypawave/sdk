@@ -333,6 +333,17 @@ const settings = await pp.getSettings();
 // settings.btc_usd_price
 ```
 
+### Other Methods
+
+Additional methods available — see types for full signatures, or [openapi.json](https://hypawave.com/.well-known/openapi.json) for the complete API reference.
+
+- `listInvoices(params?)` — list invoices with filters and pagination
+- `getPayerReceipt(invoiceId, accessToken)` — receipt fetch using a payer access token (no API key needed)
+- `getUploadUrl(params)` — signed URL for encrypted file upload (creator side)
+- `storeFile(params)` — register an uploaded file against an invoice
+- `storeFileKey(params)` — register a file's encryption key against an invoice
+- `request(path, options)` — low-level escape hatch for direct API calls
+
 ## Error Handling
 
 All API errors throw `HypawaveAPIError` with structured fields:
