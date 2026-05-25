@@ -113,6 +113,33 @@ Resources for raw HTTP:
 - **Agent instructions**: [hypawave.com/llms.txt](https://hypawave.com/llms.txt) — step-by-step settlement flows for LLM-powered agents
 - **OpenAPI spec**: [hypawave.com/.well-known/openapi.json](https://hypawave.com/.well-known/openapi.json) — full machine-readable API schema (OpenAPI 3.1)
 
+## Use with AI Coding Assistants
+
+This SDK ships with two files that teach AI assistants when and how to use Hypawave.
+
+### Claude Code (skill)
+
+A pre-built skill auto-triggers when you ask Claude to add a paywall, monetize an endpoint, or build agent-to-agent payments.
+
+Install once after `npm install @hypawave/sdk`:
+
+```bash
+cp -r node_modules/@hypawave/sdk/skills/hypawave ~/.claude/skills/
+```
+
+Then ask Claude Code: *"Add a Lightning paywall to this API"* — it picks up the skill, follows the protocol rules, and uses the SDK correctly.
+
+### Other assistants (Codex, Cursor, Aider, Continue, etc.)
+
+The repo's root [`AGENTS.md`](./AGENTS.md) follows the emerging cross-tool convention. Assistants that support `AGENTS.md` (Codex CLI, several Cursor/Aider configs, and others adopting the standard) will pick up Hypawave context automatically.
+
+### Under the hood
+
+Both files point to two authoritative web sources so instructions stay fresh:
+
+- [`llms.txt`](https://hypawave.com/llms.txt) — full operating manual (rules, recipes, auth, fees, production gotchas)
+- [`openapi.json`](https://hypawave.com/.well-known/openapi.json) — exact endpoint schemas
+
 ## API
 
 ### `new Hypawave(config)`

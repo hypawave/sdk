@@ -1,6 +1,6 @@
 {
   "name": "@hypawave/sdk",
-  "version": "0.1.2",
+  "version": "0.2.0",
   "description": "TypeScript SDK for Lightning settlement, preimage proof, and execution unlocks for AI agents.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -14,6 +14,8 @@
   },
   "files": [
     "dist",
+    "skills",
+    "AGENTS.md",
     "README.md",
     "LICENSE"
   ],
@@ -48,7 +50,11 @@
     "lnurl",
     "x402",
     "l402",
-    "micropayments"
+    "micropayments",
+    "claude",
+    "claude-code",
+    "skill",
+    "agent-skill"
   ],
   "author": "hypawave",
   "license": "MIT",
