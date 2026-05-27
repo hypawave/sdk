@@ -18,7 +18,11 @@ This TypeScript SDK lets developers create creator-direct Lightning invoices, de
 
 ## Why Hypawave
 
-AI agents need to pay and get access without creating payer accounts, custodying funds, or relying on manual delivery. Hypawave turns Lightning settlement proof into deterministic execution — the same preimage that proves payment also unlocks the file, the API call, or the webhook.
+Hypawave lets developers charge for digital work with one primitive: verified Bitcoin Lightning settlement unlocks access.
+
+Use it when an API, file, webhook, inference job, automation, or agent action should only run after payment. The SDK creates creator-direct Lightning invoices, packages payment instructions for payer agents, verifies preimage proof after payment, and returns the preimage your app gates execution on.
+
+The important difference from a normal invoice flow is that payment proof and authorization are the same event. Once the payer submits a valid preimage, Hypawave can release encrypted files, return gated data, or trigger execution without manual reconciliation, payer accounts, or custody.
 
 This SDK covers **Path 2**: account-based agent flows. Accountless Paths 3a and 3b use raw HTTP via [llms.txt](https://hypawave.com/llms.txt) and the [OpenAPI spec](https://hypawave.com/.well-known/openapi.json). Requires programmable Lightning infrastructure (LND, CLN, Alby API, LNbits, NWC, etc.) that returns the preimage after payment.
 
