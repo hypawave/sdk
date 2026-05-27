@@ -1,6 +1,6 @@
 # @hypawave/sdk
 
-**Lightning SDK for AI Agent Payments — non-custodial Bitcoin settlement with preimage proof**
+**Bitcoin Lightning SDK for AI Agent Payments — non-custodial settlement with preimage-proof unlocks**
 
 [![npm version](https://img.shields.io/npm/v/@hypawave/sdk.svg)](https://www.npmjs.com/package/@hypawave/sdk)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/hypawave/sdk/blob/main/LICENSE)
@@ -10,13 +10,15 @@
 
 > ⚠️ **Hypawave has no token and will never issue one.** Any "HYPA," "WAVE," airdrop, or token offer claiming to be from Hypawave is a scam. Hypawave is non-custodial Bitcoin Lightning settlement — buyers pay creators directly in sats. The protocol fee is the only economic primitive.
 
-TypeScript SDK for settlement-triggered Lightning execution. Fetch creator-direct Lightning invoices, confirm preimage proof, and trigger deterministic unlocks.
+Hypawave is programmable settlement infrastructure for AI agents: a non-custodial Bitcoin Lightning protocol where verified payment unlocks API access, files, agent actions, and digital work.
+
+This TypeScript SDK lets developers create creator-direct Lightning invoices, deliver payment payloads to payer agents, verify preimage proof, and trigger deterministic unlocks.
 
 **Payment is the authorization — confirmed settlement unconditionally unlocks access.**
 
 ## Why Hypawave
 
-AI agents need to pay and get access without accounts, custody, or manual delivery. Hypawave turns Lightning settlement proof into deterministic execution — the same preimage that proves payment also unlocks the file, the API call, or the webhook.
+AI agents need to pay and get access without creating payer accounts, custodying funds, or relying on manual delivery. Hypawave turns Lightning settlement proof into deterministic execution — the same preimage that proves payment also unlocks the file, the API call, or the webhook.
 
 This SDK covers **Path 2**: account-based agent flows. Accountless Paths 3a and 3b use raw HTTP via [llms.txt](https://hypawave.com/llms.txt) and the [OpenAPI spec](https://hypawave.com/.well-known/openapi.json). Requires programmable Lightning infrastructure (LND, CLN, Alby API, LNbits, NWC, etc.) that returns the preimage after payment.
 
@@ -47,19 +49,21 @@ npm install @hypawave/sdk
 
 ## Quick Start
 
+This example shows the full settlement loop in one script for clarity. In production, the creator/developer usually creates the invoice, then sends either `payment_url` to a browser payer or `getPaymentPayload()` to a payer agent.
+
 ```typescript
 import { Hypawave } from "@hypawave/sdk";
 
 const pp = new Hypawave({ apiKey: "sk_live_..." });
 
-// Create a payment request for a payer agent
+// Create a payment request
 const invoice = await pp.createInvoice({
   client_email: "alice@example.com",
   client_first_name: "Alice",
   client_last_name: "Smith",
   amount: 5.00,
   due_date: "2026-12-31",
-  payment_destination: "creator@getalby.com",
+  payment_destination: "creator@getalby.com", // optional; defaults to the API key owner's Lightning Address
 });
 
 console.log(invoice.invoice_id);   // Use for confirmation + key retrieval
@@ -168,6 +172,10 @@ const invoice = await pp.createInvoice({
   execution_webhook: "https://your-server.com/on-paid", // optional
 });
 ```
+
+`payment_destination` is optional — defaults to the API key owner's stored Lightning Address. Override per-call only for marketplace routing, multi-wallet owners, or pass-through flows.
+
+**Delivery primitives.** The response returns two ways to deliver the invoice. `payment_url` is a browser-based payment page — send it to any payer that pays via a browser. `getPaymentPayload()` (built from `access_token` + `instructions_url`) is the agent-native equivalent — send it to a payer agent that pays programmatically. Both terminate at the same `confirmPayment` endpoint with the same preimage proof; the choice depends on the receiver's capabilities, not the invoice.
 
 ### `getBolt11(accessToken)`
 
@@ -365,11 +373,10 @@ const settings = await pp.getSettings();
 Additional methods available — see types for full signatures, or [openapi.json](https://hypawave.com/.well-known/openapi.json) for the complete API reference.
 
 - `listInvoices(params?)` — list invoices with filters and pagination
-- `getPayerReceipt(invoiceId, accessToken)` — receipt fetch using a payer access token (no API key needed)
+- `getPayerReceipt(invoiceId, preimage)` — payer receipt fetch using the Lightning preimage as proof of payment (no API key needed)
 - `getUploadUrl(params)` — signed URL for encrypted file upload (creator side)
 - `storeFile(params)` — register an uploaded file against an invoice
 - `storeFileKey(params)` — register a file's encryption key against an invoice
-- `request(path, options)` — low-level escape hatch for direct API calls
 
 ## Error Handling
 
