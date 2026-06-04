@@ -10,7 +10,9 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [18, 20]
+        # Vitest 3 / Vite is ESM-only and needs Node >= 20, so CI runs on 20 & 22.
+        # The published SDK itself still supports Node >= 18 at runtime.
+        node-version: [20, 22]
     steps:
       - uses: actions/checkout@v4
 
