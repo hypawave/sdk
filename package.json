@@ -1,6 +1,6 @@
 {
   "name": "@hypawave/sdk",
-  "version": "0.2.2",
+  "version": "0.3.0",
   "description": "TypeScript SDK for Lightning settlement, preimage proof, and execution unlocks for AI agents.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
@@ -17,10 +17,14 @@
     "skills",
     "AGENTS.md",
     "README.md",
+    "CHANGELOG.md",
     "LICENSE"
   ],
   "scripts": {
     "build": "tsup src/index.ts --format cjs,esm --dts --clean",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
     "prepublishOnly": "npm run build"
   },
   "keywords": [
@@ -65,7 +69,8 @@
   "homepage": "https://hypawave.com/docs",
   "devDependencies": {
     "tsup": "^8.0.0",
-    "typescript": "^5.0.0"
+    "typescript": "^5.0.0",
+    "vitest": "^3.0.0"
   },
   "engines": {
     "node": ">=18"

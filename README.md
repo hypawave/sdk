@@ -3,6 +3,7 @@
 **Bitcoin Lightning SDK for AI Agent Payments — non-custodial settlement with preimage-proof unlocks**
 
 [![npm version](https://img.shields.io/npm/v/@hypawave/sdk.svg)](https://www.npmjs.com/package/@hypawave/sdk)
+[![CI](https://github.com/hypawave/sdk/actions/workflows/ci.yml/badge.svg)](https://github.com/hypawave/sdk/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/hypawave/sdk/blob/main/LICENSE)
 [![Node >= 18](https://img.shields.io/badge/Node-%3E%3D18-brightgreen.svg)](https://nodejs.org)
 
@@ -156,7 +157,8 @@ Both files point to two authoritative web sources so instructions stay fresh:
 |-----------|------|---------|-------------|
 | `apiKey` | `string` | — | API key (`sk_test_*` or `sk_live_*`) |
 | `baseUrl` | `string` | `https://hypawave.com` | API base URL |
-| `timeout` | `number` | `30000` | Request timeout in ms |
+| `timeout` | `number` | `30000` | Request timeout in ms (per attempt) |
+| `maxRetries` | `number` | `3` | Max automatic retries on 429 / retryable 5xx / network errors (`0` disables). Honors `Retry-After`. |
 
 ### `createInvoice(params)`
 
@@ -330,12 +332,15 @@ const { downloadUrl } = await pp.getOfferDownloadUrl(paymentIntentId, {
 
 ### `waitForSettlement(invoiceId, options?)`
 
-Poll until an invoice settles, fails, or expires.
+Poll until an invoice settles, fails, or expires. Polling backs off
+adaptively — the interval ramps from `pollInterval` up to `maxPollInterval`
+(with jitter) so a busy backend isn't hit on a fixed cadence.
 
 ```typescript
 const result = await pp.waitForSettlement(invoiceId, {
-  pollInterval: 2000,  // ms between polls (default: 2000)
-  timeout: 300000,     // max wait time in ms (default: 300000)
+  pollInterval: 2000,     // starting interval in ms (default: 2000)
+  maxPollInterval: 20000, // ceiling the interval ramps toward (default: 20000)
+  timeout: 300000,        // max wait time in ms (default: 300000)
 });
 
 if (result.unlocked) {

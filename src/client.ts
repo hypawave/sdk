@@ -30,6 +30,25 @@ import { HypawaveAPIError } from "./errors";
 
 const DEFAULT_BASE_URL = "https://hypawave.com";
 const DEFAULT_TIMEOUT = 30_000;
+const DEFAULT_MAX_RETRIES = 3;
+const RETRY_BASE_MS = 500;
+const RETRY_CAP_MS = 8_000;
+
+type QueryValue = string | number | boolean | undefined;
+
+const sleep = (ms: number) => new Promise<void>((r) => setTimeout(r, ms));
+
+/** Full-jitter exponential backoff, honoring a Retry-After header when present. */
+function backoffDelay(attempt: number, retryAfter: string | null): number {
+  if (retryAfter) {
+    const secs = Number(retryAfter);
+    if (Number.isFinite(secs)) return Math.max(0, secs * 1000);
+    const date = Date.parse(retryAfter);
+    if (!Number.isNaN(date)) return Math.max(0, date - Date.now());
+  }
+  const exp = Math.min(RETRY_CAP_MS, RETRY_BASE_MS * 2 ** attempt);
+  return Math.random() * exp;
+}
 
 async function sha256hex(hex: string): Promise<string> {
   const bytes = new Uint8Array(hex.match(/.{2}/g)!.map((b) => parseInt(b, 16)));
@@ -43,6 +62,7 @@ export class Hypawave {
   private readonly apiKey: string;
   private readonly baseUrl: string;
   private readonly timeout: number;
+  private readonly maxRetries: number;
 
   constructor(config: HypawaveConfig) {
     if (!config.apiKey) {
@@ -54,53 +74,101 @@ export class Hypawave {
     this.apiKey = config.apiKey;
     this.baseUrl = (config.baseUrl || DEFAULT_BASE_URL).replace(/\/+$/, "");
     this.timeout = config.timeout ?? DEFAULT_TIMEOUT;
+    this.maxRetries = Math.max(0, config.maxRetries ?? DEFAULT_MAX_RETRIES);
   }
 
   private async request<T>(
     method: "GET" | "POST",
     path: string,
     body?: unknown,
-    query?: Record<string, string>
+    query?: Record<string, QueryValue>,
+    opts?: { retrySafe?: boolean }
   ): Promise<T> {
     let url = `${this.baseUrl}${path}`;
     if (query) {
-      const params = new URLSearchParams(query);
-      url += `?${params.toString()}`;
+      const params = new URLSearchParams();
+      for (const [k, v] of Object.entries(query)) {
+        if (v !== undefined) params.set(k, String(v));
+      }
+      const qs = params.toString();
+      if (qs) url += `?${qs}`;
     }
 
-    const controller = new AbortController();
-    const timer = setTimeout(() => controller.abort(), this.timeout);
+    // A call is "retry-safe" when repeating it cannot cause duplicate side
+    // effects — every GET, plus POSTs the server makes idempotent (e.g. a
+    // unique payment_hash). 5xx and network errors are retried only when
+    // retry-safe. 429 is always retried regardless: the server explicitly
+    // asked the client to slow down and did not process the request, so
+    // repeating it (after Retry-After) is safe.
+    const retrySafe = opts?.retrySafe ?? method === "GET";
 
-    try {
-      const res = await fetch(url, {
-        method,
-        headers: {
-          Authorization: `Bearer ${this.apiKey}`,
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: body ? JSON.stringify(body) : undefined,
-        signal: controller.signal,
-      });
+    for (let attempt = 0; ; attempt++) {
+      const controller = new AbortController();
+      const timer = setTimeout(() => controller.abort(), this.timeout);
 
-      const data = await res.json();
-
-      if (!res.ok) {
-        throw new HypawaveAPIError(res.status, data);
-      }
-
-      return data as T;
-    } catch (err) {
-      if (err instanceof HypawaveAPIError) throw err;
-      if (err instanceof DOMException && err.name === "AbortError") {
-        throw new HypawaveAPIError(408, {
-          error: "timeout",
-          message: `Request timed out after ${this.timeout}ms`,
+      try {
+        const res = await fetch(url, {
+          method,
+          headers: {
+            Authorization: `Bearer ${this.apiKey}`,
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+          body: body ? JSON.stringify(body) : undefined,
+          signal: controller.signal,
         });
+
+        // Parse defensively: overloaded backends / proxies often return HTML
+        // or empty bodies on 5xx, which would otherwise throw a SyntaxError.
+        let data: unknown;
+        let parseFailed = false;
+        try {
+          data = await res.json();
+        } catch {
+          parseFailed = true;
+          data = res.ok
+            ? { error: "invalid_response", message: "Server returned a successful status with a non-JSON body." }
+            : { error: `http_${res.status}`, message: `Server returned status ${res.status} with a non-JSON body.` };
+        }
+
+        if (!res.ok) {
+          const retryable = res.status === 429 || (res.status >= 500 && retrySafe);
+          if (retryable && attempt < this.maxRetries) {
+            clearTimeout(timer);
+            await sleep(backoffDelay(attempt, res.headers.get("retry-after")));
+            continue;
+          }
+          throw new HypawaveAPIError(res.status, data as { error: string; message?: string; field?: string });
+        }
+
+        // Successful status but unparseable body: surface as an error rather
+        // than returning a fake-success object cast to T.
+        if (parseFailed) {
+          throw new HypawaveAPIError(res.status, data as { error: string; message?: string; field?: string });
+        }
+
+        return data as T;
+      } catch (err) {
+        if (err instanceof HypawaveAPIError) throw err;
+        if (err instanceof DOMException && err.name === "AbortError") {
+          throw new HypawaveAPIError(408, {
+            error: "timeout",
+            message: `Request timed out after ${this.timeout}ms`,
+          });
+        }
+        // Network-level failure (DNS, connection reset, etc.). A reset can
+        // arrive *after* the server already processed the request, so retry
+        // only when the call is retry-safe — otherwise a POST like
+        // createInvoice could be duplicated.
+        if (retrySafe && attempt < this.maxRetries) {
+          clearTimeout(timer);
+          await sleep(backoffDelay(attempt, null));
+          continue;
+        }
+        throw err;
+      } finally {
+        clearTimeout(timer);
       }
-      throw err;
-    } finally {
-      clearTimeout(timer);
     }
   }
 
@@ -113,7 +181,11 @@ export class Hypawave {
   }
 
   async confirmPayment(invoiceId: number, params: ConfirmPaymentParams): Promise<ConfirmPaymentResponse> {
-    return this.request<ConfirmPaymentResponse>("POST", `/api/invoice/${invoiceId}/confirm`, params);
+    // Server is idempotent on payment_hash (unique index + optimistic lock),
+    // so retrying a 5xx cannot double-settle.
+    return this.request<ConfirmPaymentResponse>("POST", `/api/invoice/${invoiceId}/confirm`, params, undefined, {
+      retrySafe: true,
+    });
   }
 
   getPaymentPayload(params: CreateInvoiceParams, response: CreateInvoiceResponse): PaymentPayload {
@@ -149,13 +221,20 @@ export class Hypawave {
    *   - duplicate_topup    — a pending top-up invoice already exists
    */
   async topup(_params?: TopupParams): Promise<TopupResponse> {
-    return this.request<TopupResponse>("POST", "/api/agent/topup", {});
+    // Idempotent: server reuses any pending top-up (duplicate_topup / reused).
+    return this.request<TopupResponse>("POST", "/api/agent/topup", {}, undefined, { retrySafe: true });
   }
 
   async getUnlockStatus(invoiceIds: number[]): Promise<UnlockStatusResponse> {
-    return this.request<UnlockStatusResponse>("POST", "/api/get-unlock-status", {
-      invoice_ids: invoiceIds,
-    });
+    // Read-only POST: safe to retry on 5xx/network so waitForSettlement can
+    // ride through backend overload instead of failing fast.
+    return this.request<UnlockStatusResponse>(
+      "POST",
+      "/api/get-unlock-status",
+      { invoice_ids: invoiceIds },
+      undefined,
+      { retrySafe: true }
+    );
   }
 
   async getKey(invoiceFileId: string, token?: string): Promise<GetKeyResponse> {
@@ -177,16 +256,11 @@ export class Hypawave {
   }
 
   async listInvoices(params?: ListInvoicesParams): Promise<ListInvoicesResponse> {
-    const query: Record<string, string> = {};
-    if (params?.limit !== undefined) query.limit = String(params.limit);
-    if (params?.offset !== undefined) query.offset = String(params.offset);
-    if (params?.status) query.status = params.status;
-    return this.request<ListInvoicesResponse>(
-      "GET",
-      "/api/agent/list-invoices",
-      undefined,
-      Object.keys(query).length ? query : undefined
-    );
+    return this.request<ListInvoicesResponse>("GET", "/api/agent/list-invoices", undefined, {
+      limit: params?.limit,
+      offset: params?.offset,
+      status: params?.status,
+    });
   }
 
   async getInvoiceFiles(invoiceIds: number[], token?: string): Promise<InvoiceFilesResponse> {
@@ -205,13 +279,15 @@ export class Hypawave {
     return this.request<DownloadUrlResponse>(
       "POST",
       `/api/offers/payment-intent/${paymentIntentId}/download-url`,
-      params
+      params,
+      undefined,
+      { retrySafe: true }
     );
   }
 
   async getReceipt(invoiceId: number): Promise<ReceiptResponse> {
     return this.request<ReceiptResponse>("GET", "/api/agent/receipt", undefined, {
-      invoice_id: String(invoiceId),
+      invoice_id: invoiceId,
     });
   }
 
@@ -227,13 +303,16 @@ export class Hypawave {
 
   async waitForSettlement(
     invoiceId: number,
-    options?: { pollInterval?: number; timeout?: number }
+    options?: { pollInterval?: number; maxPollInterval?: number; timeout?: number }
   ): Promise<UnlockStatusResponse["statuses"][string]> {
-    const interval = options?.pollInterval ?? 2000;
+    // Adaptive polling: start fast, then ramp up so a busy backend isn't
+    // pounded on a fixed cadence. Jitter spreads many concurrent clients out.
+    const base = options?.pollInterval ?? 2000;
+    const maxInterval = options?.maxPollInterval ?? 20_000;
     const timeout = options?.timeout ?? 300_000;
     const start = Date.now();
 
-    while (Date.now() - start < timeout) {
+    for (let attempt = 0; Date.now() - start < timeout; attempt++) {
       const status = await this.getUnlockStatus([invoiceId]);
       const entry = status.statuses?.[String(invoiceId)];
 
@@ -245,7 +324,9 @@ export class Hypawave {
         return entry;
       }
 
-      await new Promise((r) => setTimeout(r, interval));
+      const ceiling = Math.min(maxInterval, base * 2 ** attempt);
+      const wait = ceiling / 2 + Math.random() * (ceiling / 2);
+      await sleep(Math.min(wait, Math.max(0, start + timeout - Date.now())));
     }
 
     throw new HypawaveAPIError(408, {

@@ -2,6 +2,8 @@ export interface HypawaveConfig {
   apiKey: string;
   baseUrl?: string;
   timeout?: number;
+  /** Max automatic retries on 429 / retryable 5xx / network errors. Default 3. Set 0 to disable. */
+  maxRetries?: number;
 }
 
 export interface CreateInvoiceParams {
