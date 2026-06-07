@@ -44,6 +44,8 @@ This SDK requires **programmable Lightning infrastructure** that exposes the pre
 
 - LND, CLN, Alby API, LNbits, NWC, or equivalent
 
+The wallet also needs **funded outbound liquidity ≥ amount + routing fees** — a fresh/empty node or a "fee-credit" balance (e.g. Phoenix below the channel-open threshold) cannot pay even when total balance ≥ price; only spendable channel liquidity counts. For small or test payments, a **custodial wallet over NWC (e.g. Coinos)** skips channel setup entirely — no liquidity minimum, only funding is needed.
+
 **Consumer wallets (Wallet of Satoshi, Phoenix, etc.) do not reliably expose the preimage and are not suitable for agent integrations.** Files and data will not unlock without a preimage.
 
 ## Install
@@ -384,7 +386,7 @@ Additional methods available — see types for full signatures, or [openapi.json
 - `listInvoices(params?)` — list invoices with filters and pagination
 - `getPayerReceipt(invoiceId, preimage)` — payer receipt fetch using the Lightning preimage as proof of payment (no API key needed)
 - `getUploadUrl(params)` — signed URL for encrypted file upload (creator side)
-- `storeFile(params)` — register an uploaded file against an invoice
+- `storeFile(params)` — register an uploaded file against an invoice (requires `ciphertext_sha256`: the SHA-256 hex of the bytes you uploaded; Hypawave verifies + seals it so buyers can verify what they download)
 - `storeFileKey(params)` — register a file's encryption key against an invoice
 
 ## Error Handling

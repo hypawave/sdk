@@ -5,6 +5,31 @@ All notable changes to `@hypawave/sdk` are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.1]
+
+### Changed
+- Docs only — no API changes. Clarified payer-wallet requirements in `README.md`,
+  `AGENTS.md`, and the bundled `skills/hypawave/SKILL.md`: the wallet needs
+  **funded outbound liquidity ≥ amount + fees** (a fresh/empty node or Phoenix
+  "fee-credit" balance can't pay even when total balance ≥ price), and for small
+  or test payments a **custodial wallet over NWC (e.g. Coinos)** avoids channel
+  setup entirely — only funding is needed. Mirrors the buyer-wallet guidance in
+  `llms.txt`.
+
+## [0.4.0]
+
+### Added
+- `StoreFileParams.ciphertext_sha256` (**required**) — the lowercase-hex SHA-256
+  of the exact ciphertext you upload. Hypawave verifies it against the stored
+  bytes and seals them at the first bolt11 mint, and returns it at key retrieval
+  so buyers can verify downloaded bytes before decrypting (content integrity /
+  anti-bait-and-switch).
+
+### Changed
+- `storeFile()` now requires `ciphertext_sha256`. Compute `sha256` over the same
+  bytes you PUT to the presigned upload URL and pass it through. Calls without it
+  are rejected by the API with `400 validation_error`.
+
 ## [0.3.0]
 
 ### Added
