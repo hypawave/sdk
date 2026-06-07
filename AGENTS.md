@@ -91,12 +91,12 @@ For Paths 3a / 3b, there is no SDK — use raw HTTP with pubkey signatures per t
 
 ## Non-negotiables
 
-1. **Preimage is mandatory** for principal settlements. Pay via a wallet that returns the preimage (LND, Core Lightning, LNbits admin key, Alby/NWC, Phoenixd). Consumer wallets like Wallet of Satoshi or Phoenix mobile cannot satisfy this.
+1. **Preimage is mandatory** for principal settlements. Pay via a wallet that returns the preimage (LND, Core Lightning, LNbits admin key, Alby/NWC, Phoenixd). Consumer wallets like Wallet of Satoshi or Phoenix mobile cannot satisfy this. The wallet also needs **funded outbound liquidity ≥ amount + fees** — a fresh/empty node or "fee-credit" balance can't pay even when total balance ≥ price. For small or test payments, a **custodial wallet over NWC (e.g. Coinos)** skips channel setup entirely — only funding is needed.
 2. **Confirm before unlocking.** Always submit preimage to the confirm endpoint before requesting file keys or download URLs.
 3. **Funds flow buyer→seller directly.** Never route principal through any Hypawave endpoint. Only activation fees (small, Hypawave-issued bolt11s) go to Hypawave.
 4. **Honor `terms_hash`** on Path 3b offers. If the server returns `409 terms_changed`, re-read the offer before paying.
 5. **Do not invent endpoints.** If a field or path is not in openapi.json, it does not exist.
-6. **Encrypt client-side** for file attachments. AES-256-GCM. Hypawave never sees plaintext.
+6. **Encrypt client-side** for file attachments. AES-256-GCM. Hypawave never sees plaintext. `storeFile` requires `ciphertext_sha256` (SHA-256 hex of the bytes you upload) — Hypawave verifies + seals it so buyers can verify what they download.
 
 ## When you hit something the manual doesn't cover
 
