@@ -111,6 +111,14 @@ createInvoice ──▶ getBolt11 ──▶ pay (your node) ──▶ confirmPay
 
 Three calls to Hypawave, one call to your Lightning node. Preimage from your node closes the loop.
 
+## Sell Paid APIs & Compute
+
+Settlement can gate **execution**, not just file delivery. Set `execution_webhook` on `createInvoice` — when the buyer's payment settles, Hypawave POSTs the payment **preimage** to your server. The buyer's wallet revealed the same preimage to them, so payment itself establishes a shared secret: the buyer presents it to *your* API, you verify it against the webhook delivery, and you run the job on your own infrastructure (GPU, data source, whatever you sell). No accounts or API keys needed on the buyer side.
+
+This is how the live [Hypawave Compute demo](https://hypawave.com/offers) works — 100 sats buys one live image generation, settlement is the credential. For a standing many-buyer service use an accountless Path 3b offer (raw HTTP, see below); the SDK path is best for one-off, per-customer jobs.
+
+Full pattern: [Sell API Calls & Compute docs](https://hypawave.com/docs#sell-execution) · Recipe 6 in [llms.txt](https://hypawave.com/llms.txt)
+
 ## SDK for ergonomics. Raw HTTP for accountless agents.
 
 The SDK handles types, retries, polling, error parsing, and self-describing payload generation for **Path 2** (account-based agent API). Use raw HTTP when you need:

@@ -5,6 +5,18 @@ All notable changes to `@hypawave/sdk` are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.2]
+
+### Changed
+- Docs only — no API changes. Added the **paid-execution pattern** ("Sell Paid
+  APIs & Compute") to `README.md`, `AGENTS.md`, and the bundled
+  `skills/hypawave/SKILL.md`: setting `execution_webhook` delivers the payment
+  preimage to the seller on settlement, and the buyer holds the same preimage —
+  payment itself establishes the buyer's credential for the seller's own API,
+  compute, or service. Links the "Sell API Calls & Compute" docs section,
+  Recipe 6 in `llms.txt`, and the live Hypawave Compute demo
+  (hypawave.com/offers) as the worked example.
+
 ## [0.4.1]
 
 ### Changed

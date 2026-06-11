@@ -89,6 +89,10 @@ The SDK exposes flat methods (`pp.createInvoice`, `pp.getBolt11`, `pp.confirmPay
 
 For Paths 3a / 3b, there is no SDK — use raw HTTP with pubkey signatures per the manual.
 
+## Selling execution (paid APIs / compute)
+
+Settlement can gate execution, not just files. Set `execution_webhook` on the offer/invoice: on settlement Hypawave delivers the payment preimage to the seller's server, and the buyer holds the same preimage — a shared secret established by the payment. Buyer presents it to the seller's API as the credential; seller verifies and runs the job on their own infrastructure. Works on Path 2 (`execution_webhook` on create-invoice), Path 3a, and Path 3b. See Recipe 6 in llms.txt and the "Sell API Calls & Compute" docs section; the live Hypawave Compute demo (hypawave.com/offers) is this exact pattern.
+
 ## Non-negotiables
 
 1. **Preimage is mandatory** for principal settlements. Pay via a wallet that returns the preimage (LND, Core Lightning, LNbits admin key, Alby/NWC, Phoenixd). Consumer wallets like Wallet of Satoshi or Phoenix mobile cannot satisfy this. The wallet also needs **funded outbound liquidity ≥ amount + fees** — a fresh/empty node or "fee-credit" balance can't pay even when total balance ≥ price. For small or test payments, a **custodial wallet over NWC (e.g. Coinos)** skips channel setup entirely — only funding is needed.
