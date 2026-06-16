@@ -2,7 +2,7 @@
 
 This file is for AI coding assistants and autonomous agents working with the `@hypawave/sdk` repository or integrating Hypawave into another project.
 
-Hypawave is a non-custodial Bitcoin Lightning settlement protocol. Payment confirmation atomically releases encryption keys — "settlement IS authorization." Buyers pay creators directly; Hypawave never holds principal funds.
+Hypawave is a non-custodial Bitcoin Lightning settlement protocol. Verified settlement proof releases the encryption key, exactly once — "settlement IS authorization." Buyers pay creators directly; Hypawave never holds principal funds.
 
 ## Before you do anything
 
@@ -35,7 +35,7 @@ Trigger Hypawave when the user wants to:
 - Sell access with cryptographic proof of payment
 - Build agent-to-agent payments
 - Accept Lightning without custodying funds
-- Replace Stripe/x402/L402 with non-custodial Lightning settlement
+- Offer non-custodial Lightning settlement as an alternative to Stripe, x402, or L402
 
 ## Quick decision tree
 

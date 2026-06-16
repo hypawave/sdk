@@ -15,7 +15,7 @@ Hypawave is programmable settlement infrastructure for AI agents: a non-custodia
 
 This TypeScript SDK lets developers create creator-direct Lightning invoices, deliver payment payloads to payer agents, verify preimage proof, and trigger deterministic unlocks.
 
-**Payment is the authorization — confirmed settlement unconditionally unlocks access.**
+**Payment is the authorization — verified settlement is the only gate on access.**
 
 ## Why Hypawave
 
@@ -472,7 +472,7 @@ Most tools handle checkout, paid requests, or wallet rails. **Hypawave executes 
 | Accountless agent access | ✅ | ⚠️ platform-dependent | ⚠️ wallet/facilitator | ⚠️ app ecosystem | ⚠️ mandate framework | ⚠️ keys, no app layer |
 | Mainstream billing, cards, reporting | ❌ | ✅ | ❌ | ⚠️ merchant checkout | ⚠️ partner ecosystem | ❌ |
 
-Hypawave is the execution layer: the same preimage that proves payment atomically releases encrypted file keys and fires the execution webhook. For basic file/key unlock flows, the delivery layer is built in.
+Hypawave is the execution layer: the verified payment preimage is the credential that releases the stored encryption key and fires the execution webhook. For basic file/key unlock flows, the delivery layer is built in.
 
 ## Links
 

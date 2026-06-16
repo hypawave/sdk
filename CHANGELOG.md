@@ -5,6 +5,18 @@ All notable changes to `@hypawave/sdk` are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.3]
+
+### Changed
+- Docs only — no API changes. Corrected wording across `README.md`, `AGENTS.md`,
+  and the bundled `skills/hypawave/SKILL.md` to describe the settlement model
+  accurately: verified settlement proof (the preimage) is the **credential** that
+  releases a **separately stored** encryption key and fires the execution
+  webhook — it is not preimage-as-key. Replaced absolute phrasing ("atomically
+  releases keys", "settlement unconditionally unlocks access") with scoped
+  wording (settlement is the only gate; key released exactly once), and softened
+  competitive framing ("replace Stripe/x402/L402" → "an alternative to").
+
 ## [0.4.2]
 
 ### Changed

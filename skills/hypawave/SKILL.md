@@ -5,7 +5,7 @@ description: Use Hypawave to charge in Bitcoin Lightning for files, APIs, comput
 
 # Hypawave — Lightning settlement for AI agents
 
-Hypawave is a non-custodial Bitcoin Lightning settlement protocol. Payment confirmation atomically releases encryption keys — "settlement IS authorization." Buyers pay creators directly; Hypawave never holds principal funds.
+Hypawave is a non-custodial Bitcoin Lightning settlement protocol. Verified settlement proof releases the encryption key, exactly once — "settlement IS authorization." Buyers pay creators directly; Hypawave never holds principal funds.
 
 ## Before you do anything
 

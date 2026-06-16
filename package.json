@@ -1,6 +1,6 @@
 {
   "name": "@hypawave/sdk",
-  "version": "0.4.2",
+  "version": "0.4.3",
   "description": "TypeScript SDK for Lightning settlement, preimage proof, and execution unlocks for AI agents.",
   "main": "dist/index.js",
   "module": "dist/index.mjs",
