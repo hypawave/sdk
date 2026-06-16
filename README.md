@@ -1,6 +1,6 @@
 # @hypawave/sdk
 
-**Bitcoin Lightning SDK for AI Agent Payments — non-custodial settlement with preimage-proof unlocks**
+**Bitcoin Lightning SDK for AI agent commerce — non-custodial settlement that unlocks files, APIs, and compute.**
 
 [![npm version](https://img.shields.io/npm/v/@hypawave/sdk.svg)](https://www.npmjs.com/package/@hypawave/sdk)
 [![CI](https://github.com/hypawave/sdk/actions/workflows/ci.yml/badge.svg)](https://github.com/hypawave/sdk/actions/workflows/ci.yml)
