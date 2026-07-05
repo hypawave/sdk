@@ -5,6 +5,10 @@ All notable changes to `@hypawave/sdk` are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.4]
+
+- Bundled skill (`skills/hypawave/SKILL.md`) now points to the MCP server (`@hypawave/mcp`) as the preferred execution path for the accountless flows when the agent's environment supports MCP.
+
 ## [0.4.3]
 
 ### Changed
@@ -16,6 +20,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   releases keys", "settlement unconditionally unlocks access") with scoped
   wording (settlement is the only gate; key released exactly once), and softened
   competitive framing ("replace Stripe/x402/L402" → "an alternative to").
+- Repositioned the SDK tagline and npm description from "AI Agent Payments" to
+  "AI agent commerce" — now "Bitcoin Lightning SDK for AI agent commerce —
+  non-custodial settlement that unlocks files, APIs, and compute" — in
+  `README.md` and `package.json`.
 
 ## [0.4.2]
 
