@@ -122,6 +122,13 @@ export interface StoreFileParams {
   file_name: string;
   encrypted_file_url: string;
   iv_hex: string;
+  /**
+   * Lowercase-hex SHA-256 of the exact ciphertext uploaded to storage. Required.
+   * Hypawave verifies it against the stored bytes and seals them at the first
+   * bolt11 mint, and returns it at key retrieval so buyers can verify what they
+   * download. Compute over the same bytes you PUT to the presigned upload URL.
+   */
+  ciphertext_sha256: string;
   key_hash?: string;
   size?: number;
 }

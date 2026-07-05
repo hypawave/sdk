@@ -30,6 +30,10 @@ That document is authoritative. It contains:
 https://hypawave.com/.well-known/openapi.json
 ```
 
+## Prefer the MCP server when available
+
+If your environment supports MCP, the accountless flows (Path 3a/3b) are available as ready-made tools via `npx -y @hypawave/mcp` (npm: `@hypawave/mcp`, in the official MCP Registry) — `search_offers`, `buy_offer`, `download_files`, `create_offer`, `attach_file`, `manage_offer`, and more. It handles secp256k1 signing, canonical hashing, AES-256-GCM encryption, NWC wallet payments, and settlement/preimage verification internally, and holds your seller identity — so you don't implement the protocol at all. Use this skill when MCP isn't available or as the protocol reference. Setup: https://github.com/hypawave/mcp
+
 ## Quick decision tree
 
 Pick the path that matches the user's situation:
@@ -87,6 +91,10 @@ For Paths 3a / 3b, there is no SDK — use raw HTTP with pubkey signatures per t
 ## Selling execution (paid APIs / compute)
 
 Settlement can gate execution, not just files. Set `execution_webhook` on the offer/invoice: on settlement Hypawave delivers the payment preimage to the seller's server, and the buyer holds the same preimage — a shared secret established by the payment. Buyer presents it to the seller's API as the credential; seller verifies and runs the job on their own infrastructure. Works on Path 2 (`execution_webhook` on create-invoice), Path 3a, and Path 3b. See Recipe 6 in llms.txt and the "Sell API Calls & Compute" docs section; the live Hypawave Compute demo (hypawave.com/offers) is this exact pattern.
+
+## Discovery (public offer directory)
+
+Offers can opt into a public directory. **Find offers to buy:** `GET /api/offers/public` (no auth) — filter by `q` (title/description text), `category`, `tags`, and `sort` (`newest` or `settled`); paginate via `limit`+`cursor`/`offset`. Each result carries `title`, `category`, `output_type`, `input_schema`, price, and `payment_count` — settled-sales **volume, not a trust or fulfillment guarantee**. **List your own offer:** add `is_public: true` to `POST /api/offers` with required `title`/`category`/`output_type` (and optional `tags`/`input_schema`) — immutable after creation. **Flag abuse:** `POST /api/offers/{id}/report` (queues for manual review, never auto-hides). Full field list in llms.txt → "Discovery".
 
 ## Non-negotiables
 
