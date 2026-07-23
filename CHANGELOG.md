@@ -5,6 +5,10 @@ All notable changes to `@hypawave/sdk` are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.4.5]
+
+- Bundled skill (`skills/hypawave/SKILL.md`): wallet-funding guidance — when asking the operator to fund the agent wallet, present both options with the raw copyable strings: an exact-amount Lightning invoice or the wallet's Lightning address (instant — Cash App, Coinbase, any Lightning wallet), and an on-chain deposit address for BTC held at exchanges without Lightning (e.g. Robinhood). Docs only — no API changes.
+
 ## [0.4.4]
 
 - Bundled skill (`skills/hypawave/SKILL.md`) now points to the MCP server (`@hypawave/mcp`) as the preferred execution path for the accountless flows when the agent's environment supports MCP.
